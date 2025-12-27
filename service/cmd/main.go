@@ -189,6 +189,17 @@ func main() {
 				http.NotFound(w, r)
 				return
 			}
+			
+			path := r.URL.Path
+			if path != "/" && strings.HasSuffix(path, "/") {
+				path = strings.TrimSuffix(path, "/")
+				r.URL.Path = path
+			}
+			
+			if path == "" || path == "/" {
+				r.URL.Path = "/index.html"
+			}
+			
 			fileServer.ServeHTTP(w, r)
 		}, "/"))
 		logger.Infof("Serving static files from %s", absStaticDir)
@@ -518,6 +529,30 @@ func (sfs secureFileSystem) Open(name string) (http.File, error) {
 		return nil, os.ErrNotExist
 	}
 	
-	return sfs.fs.Open(cleaned)
+	file, err := sfs.fs.Open(cleaned)
+	if err != nil {
+		if os.IsNotExist(err) && cleaned != "/index.html" {
+			return sfs.fs.Open("/index.html")
+		}
+		return nil, err
+	}
+	
+	stat, err := file.Stat()
+	if err != nil {
+		file.Close()
+		return nil, err
+	}
+	
+	if stat.IsDir() {
+		file.Close()
+		indexPath := filepath.Join(cleaned, "index.html")
+		dirFile, err := sfs.fs.Open(indexPath)
+		if err != nil {
+			return sfs.fs.Open("/index.html")
+		}
+		return dirFile, nil
+	}
+	
+	return file, nil
 }
 

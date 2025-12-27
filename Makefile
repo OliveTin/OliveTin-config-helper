@@ -13,6 +13,9 @@ backend:
 test:
 	make -C service test
 
+integration-test:
+	make -C integration-tests test
+
 lint:
 	make -C service lint
 	make -C frontend lint

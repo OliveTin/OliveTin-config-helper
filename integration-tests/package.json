@@ -1,0 +1,18 @@
+{
+  "name": "olivetin-config-helper-integration-tests",
+  "version": "1.0.0",
+  "description": "Integration tests for OliveTin-config-helper",
+  "type": "module",
+  "scripts": {
+    "test": "mocha tests/**/*.test.js --timeout 30000",
+    "test:watch": "mocha tests/**/*.test.js --watch --timeout 30000"
+  },
+  "dependencies": {
+    "selenium-webdriver": "^4.39.0"
+  },
+  "devDependencies": {
+    "mocha": "^11.7.5",
+    "chai": "^6.2.2"
+  }
+}
+
