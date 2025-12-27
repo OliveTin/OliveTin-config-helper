@@ -1,6 +1,6 @@
 .PHONY: ci install build lint
 
-ci: install build lint
+ci: install buil
 
 install:
 	npm install
