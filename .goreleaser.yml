@@ -1,0 +1,123 @@
+project_name: OliveTin-config-helper
+version: 2
+before:
+  hooks:
+    - cd service && go mod download
+    - cd frontend && npm ci && npm run build
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    binary: OliveTin-config-helper
+    main: cmd/main.go
+    dir: service
+    goos:
+      - linux
+
+    goarch:
+      - amd64
+      - arm64
+
+    ldflags:
+      - -s -w -X main.version={{.Version}} -X main.commit={{.ShortCommit}} -X main.date={{ .CommitDate }}
+
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  version_template: "{{ .Branch }}-{{ .ShortCommit }}"
+changelog:
+  sort: asc
+  groups:
+    - title: 'Security'
+      regexp: '^.*?security(\([[:word:]]+\))??!?:.+$'
+      order: 0
+    - title: 'Features'
+      regexp: '^.*?feat.*?(\([[:word:]]+\))??!?:.+$'
+      order: 1
+    - title: 'Bug fixes'
+      regexp: '^.*?fix(\([[:word:]]+\))??!?:.+$'
+      order: 2
+    - title: Others
+      order: 999
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^cicd:'
+      - '^chore:'
+      - '^release:'
+      - '^refactor:'
+      - '^Merge branch'
+
+archives: []
+
+dockers:
+  - image_templates:
+      - "docker.io/jamesread/olivetin-config-helper:{{ .Tag }}-amd64"
+      - "ghcr.io/olivetin/olivetin-config-helper:{{ .Tag }}-amd64"
+    dockerfile: Dockerfile
+    goos: linux
+    goarch: amd64
+    skip_push: false
+    build_flag_templates:
+      - "--platform=linux/amd64"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Tag}}"
+    extra_files:
+      - frontend/dist/
+
+  - image_templates:
+      - "docker.io/jamesread/olivetin-config-helper:{{ .Tag }}-arm64"
+      - "ghcr.io/olivetin/olivetin-config-helper:{{ .Tag }}-arm64"
+    dockerfile: Dockerfile.arm64
+    goos: linux
+    goarch: arm64
+    skip_push: false
+    build_flag_templates:
+      - "--platform=linux/arm64"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Tag}}"
+    extra_files:
+      - frontend/dist/
+
+docker_manifests:
+  - name_template: docker.io/jamesread/olivetin-config-helper:{{ .Version }}
+    image_templates:
+      - docker.io/jamesread/olivetin-config-helper:{{ .Version }}-amd64
+      - docker.io/jamesread/olivetin-config-helper:{{ .Version }}-arm64
+
+  - name_template: docker.io/jamesread/olivetin-config-helper:latest
+    image_templates:
+      - docker.io/jamesread/olivetin-config-helper:{{ .Version }}-amd64
+      - docker.io/jamesread/olivetin-config-helper:{{ .Version }}-arm64
+
+  - name_template: ghcr.io/olivetin/olivetin-config-helper:{{ .Version }}
+    image_templates:
+      - ghcr.io/olivetin/olivetin-config-helper:{{ .Version }}-amd64
+      - ghcr.io/olivetin/olivetin-config-helper:{{ .Version }}-arm64
+
+  - name_template: ghcr.io/olivetin/olivetin-config-helper:latest
+    image_templates:
+      - ghcr.io/olivetin/olivetin-config-helper:{{ .Version }}-amd64
+      - ghcr.io/olivetin/olivetin-config-helper:{{ .Version }}-arm64
+
+release:
+  footer: |
+    ## Container images (from GitHub)
+
+    - `docker pull ghcr.io/olivetin/olivetin-config-helper:{{ .Version }}`
+
+    ## Container images ([on Docker Hub](https://hub.docker.com/r/jamesread/olivetin-config-helper/tags?page=1&ordering=last_updated))
+
+    - `docker pull docker.io/jamesread/olivetin-config-helper:{{ .Version }}`
+
+    ## Upgrade warnings, or breaking changes
+
+    - No such issues between the last release and this version.
+
+    ## Useful links
+
+    - [Documentation](https://github.com/OliveTin/OliveTin-config-helper)
+    - [Ask for help and chat with others users in the Discord community](https://discord.gg/jhYWWpNJ3v)
+
+    Thanks for your interest in OliveTin-config-helper!

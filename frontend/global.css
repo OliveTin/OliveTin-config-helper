@@ -1,0 +1,48 @@
+h3 {
+  margin: 0;
+}
+
+fieldset {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .5em;
+  row-gap: 1.5em;;
+  margin-bottom: 1em;
+  padding: 1em;
+  border: 1px solid #ccc;
+  border-radius: 0.5em;
+  background-color: #f0f0f0;
+  box-shadow: 0 0 0.5em #ccc;
+}
+
+legend {
+  font-weight: bold;
+  margin-bottom: 0.5em;
+  padding: 0.5em;
+  border: 1px solid #ccc;
+  border-radius: 0.5em;
+  background-color: #f0f0f0;
+  box-shadow: 0 0 0.5em #ccc;
+}
+
+span.description {
+  font-size: 0.8em;
+  display: block;
+  font-weight: normal;
+  color: #666;
+  margin-top: 0.5em;
+}
+
+span.key-info {
+  display: block;
+  font-size: 0.8em;
+  font-weight: normal;
+  color: #666;
+  margin-top: 0.5em;
+}
+
+code.key-name {
+  font-weight: normal;
+  color: #666;
+  margin-top: 0.5em;
+}
