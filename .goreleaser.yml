@@ -1,10 +1,5 @@
 project_name: OliveTin-config-helper
 version: 2
-before:
-  hooks:
-    - cd service && go mod download
-    - cd frontend && npm ci && npm run build
-
 builds:
   - env:
       - CGO_ENABLED=0
