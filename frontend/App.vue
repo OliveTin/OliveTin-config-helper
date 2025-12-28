@@ -216,10 +216,5 @@ header {
   transform: scale(1.1);
 }
 
-footer {
-  display: flex;
-  gap: 1em;
-  align-items: center;
-}
 </style>
 

@@ -183,7 +183,7 @@ func main() {
 	}
 
 	if _, err := os.Stat(absStaticDir); err == nil {
-		fileServer := http.FileServer(secureFileSystem{http.Dir(absStaticDir), absStaticDir})
+		fileSystem := secureFileSystem{http.Dir(absStaticDir), absStaticDir}
 		mux.HandleFunc("/", metricsMiddleware(func(w http.ResponseWriter, r *http.Request) {
 			if strings.HasPrefix(r.URL.Path, "/api/") {
 				http.NotFound(w, r)
@@ -191,16 +191,34 @@ func main() {
 			}
 			
 			path := r.URL.Path
-			if path != "/" && strings.HasSuffix(path, "/") {
+			if path == "/" || path == "" {
+				path = "/index.html"
+			} else if path != "/" && strings.HasSuffix(path, "/") {
 				path = strings.TrimSuffix(path, "/")
-				r.URL.Path = path
 			}
 			
-			if path == "" || path == "/" {
-				r.URL.Path = "/index.html"
+			file, err := fileSystem.Open(path)
+			if err != nil {
+				if os.IsNotExist(err) {
+					file, err = fileSystem.Open("/index.html")
+					if err != nil {
+						http.NotFound(w, r)
+						return
+					}
+				} else {
+					http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+					return
+				}
+			}
+			defer file.Close()
+			
+			stat, err := file.Stat()
+			if err != nil {
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
 			}
 			
-			fileServer.ServeHTTP(w, r)
+			http.ServeContent(w, r, stat.Name(), stat.ModTime(), file)
 		}, "/"))
 		logger.Infof("Serving static files from %s", absStaticDir)
 	} else {
@@ -510,9 +528,6 @@ type secureFileSystem struct {
 
 func (sfs secureFileSystem) Open(name string) (http.File, error) {
 	cleaned := filepath.Clean(name)
-	if cleaned == "/" || cleaned == "" {
-		cleaned = "/index.html"
-	}
 	
 	path := filepath.Join(sfs.root, cleaned)
 	absPath, err := filepath.Abs(path)
